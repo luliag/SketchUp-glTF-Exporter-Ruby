@@ -25,7 +25,7 @@
 require "json"
 require 'langhandler'
 require 'sketchup'
-require 'profiler'
+#require 'profiler'
 
 Sketchup.require 'yulio_gltf_export/gltf_nodes'
 Sketchup.require 'yulio_gltf_export/gltf_buffers'
