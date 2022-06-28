@@ -27,6 +27,7 @@ require 'langhandler'
 require 'sketchup'
 #require 'profiler'
 
+Sketchup.require 'yulio_gltf_export/gltf_component_definitions'
 Sketchup.require 'yulio_gltf_export/gltf_nodes'
 Sketchup.require 'yulio_gltf_export/gltf_buffers'
 Sketchup.require 'yulio_gltf_export/gltf_buffer_views'
@@ -76,6 +77,7 @@ module Yulio
 				
 				# construct the needed objects
 				@buffers = GltfBuffers.new
+				@definitions = GltfComponentDefinitions.new
 				@buffer_views = GltfBufferViews.new
 				@accessors = GltfAccessors.new
 				@images = GltfImages.new(@buffers, @buffer_views, @errors, @current_buffer_index)
@@ -171,7 +173,8 @@ module Yulio
 					end
 					
 					# now show the save-as dialog for the user to change the exported filename
-					filename = UI.savepanel(nil, model.path, filename)
+					#filename = UI.savepanel(nil, model.path, filename)
+					filename = UI.savepanel(nil,filename, filename) #add by lulg
 					# it would really have been nice if the user could then select the model type from savepanel.. :(
 					
 					if filename == nil
@@ -201,6 +204,8 @@ module Yulio
 					#puts 'Collating geometry and materials'
 					root_node_id = @nodes.add_node('root', matrix, @use_matrix)
 					@mesh_geometry_collect.collate_geometry(root_node_id, matrix, model.active_entities, nil, nil)
+					#statistics of definitions
+                    @definitions.statistics(model)					
 					
 					#puts 'Generating Buffers'
 					index_count = prepare_buffers_for_writing()
@@ -235,6 +240,7 @@ module Yulio
 					export["asset"] = asset
 					export["scene"] = 0
 					export["scenes"] = scenes
+					export["definitions"] = @definitions.definitions
 					export["nodes"] = @nodes.nodes
 					#glTF spec doesn't allow for an empty camera list (or any empty list for that matter) => the validator will throw an error in such a case
 					if (@cameras.cameras.length > 0)
